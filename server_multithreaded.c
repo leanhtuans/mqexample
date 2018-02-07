@@ -1,6 +1,8 @@
 #include <errno.h>
 #include <pthread.h>
 #include <sys/syscall.h>
+#include <sys/types.h>
+#include <unistd.h>
 
 #include "common.h"
 
@@ -30,11 +32,11 @@ void *data_receiver(void *arg)
 
         /* receive the message */
 		pthread_mutex_lock(&mutx);
-		printf("data_receiver thread: waiting data...\n");
+//		printf("data_receiver thread: waiting data...\n");
 		bytes_read = mq_receive(mq, buffer, MAX_SIZE, NULL);
 		CHECK(bytes_read >= 0);		
 		buffer[bytes_read] = '\0';		
-		printf("data_receiver thread: received data: %s.\n", buffer);
+//		printf("data_receiver thread: received data: %s.\n", buffer);
 		pthread_mutex_unlock(&mutx);
 		pthread_cond_signal(&cv);
     } while (!must_stop);
@@ -53,10 +55,10 @@ void *data_proccessing(void* arg)
     do
 	{
 		pthread_mutex_lock(&mutx);
-		printf("data_proccessing thread: waiting data...\n");
+//		printf("data_proccessing thread: waiting data...\n");
 		while (!buffer[0])
 			pthread_cond_wait(&cv, &mutx);
-		printf("data_proccessing thread: received data: %s.\n", buffer);
+//		printf("data_proccessing thread: received data: %s.\n", buffer);
 		if (! strncmp(buffer, MSG_STOP, strlen(MSG_STOP)))
 		{
 			must_stop = 1;
@@ -80,6 +82,7 @@ int main(int argc, char **argv)
 	printf("Main thread, PID %d TID %d\n", getpid(), (pid_t)syscall(SYS_gettid));
 	
 	pthread_create(&tiddata_proccessing, NULL, data_proccessing, NULL);
+	sleep(1);
 	pthread_create(&tiddata_receiver, NULL, data_receiver, NULL);
 	
 	pthread_join(tiddata_receiver, NULL);
