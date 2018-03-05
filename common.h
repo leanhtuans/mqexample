@@ -21,5 +21,19 @@
         } \
     } while (0) \
 
+typedef enum {
+	BAO_START_REQ,
+	BAO_STOP_REQ,
+	BAO_QUESTION_REQ,
+	BAO_ANSWER_REQ
+} BAO_IPC_MSG;
+	
+typedef struct _bao_msg_t {
+	BAO_IPC_MSG message;
+	char content[MAX_SIZE + 1];
+} BAO_msg_t;
+	
+void *data_proccessing(void* msg);
+void *data_receiver(void *arg);
 
 #endif /* #ifndef COMMON_H_ */
